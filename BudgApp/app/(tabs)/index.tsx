@@ -45,15 +45,31 @@ export default function Home() {
   const fetchQuote = async () => {
     setQuoteLoading(true);
     setQuoteError("");
+    setQuote(null);
+    setQuoteAuthor(null);
+
     try {
-      const res = await fetch("https://api.quotable.io/random?tags=business|money");
+      const res = await fetch("https://zenquotes.io/api/random");
+
       if (!res.ok) {
-        throw new Error("Bad response");
+        throw new Error("Failed request");
       }
+
       const data = await res.json();
-      setQuote(data.content);
-      setQuoteAuthor(data.author);
-    } catch {
+
+      const item = Array.isArray(data) ? data[0] : null;
+
+      const text = item?.q;
+      const author = item?.a;
+
+      if (!text) {
+        throw new Error("Missing quote field");
+      }
+
+      setQuote(text);
+      setQuoteAuthor(author || null);
+    } catch (error) {
+      console.log("ZenQuotes error:", error);
       setQuoteError("Could not load a quote.");
     } finally {
       setQuoteLoading(false);
@@ -119,7 +135,7 @@ export default function Home() {
 
       <Card style={styles.quoteCard}>
         <View style={styles.quoteHeaderRow}>
-          <Text style={globalStyles.sectionTitle}>Financial quote</Text>
+          <Text style={globalStyles.sectionTitle}>Your inspiration for today!</Text>
           <PrimaryButton
             title="Refresh"
             onPress={fetchQuote}
