@@ -1,115 +1,71 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Text, StyleSheet, View, ActivityIndicator, Animated } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { Redirect, useRouter } from "expo-router";
-import { logout, selectIsAuthenticated, selectUsername } from "../../src/redux/userReducer";
-import Screen from "../../src/components/Screen";
+import { useRouter } from "expo-router";
+import React, { useEffect, useRef } from "react";
+import { Animated, StyleSheet, Text, View } from "react-native";
+import { useSelector } from "react-redux";
+
 import Card from "../../src/components/Card";
 import PrimaryButton from "../../src/components/PrimaryButton";
+import Screen from "../../src/components/Screen";
+
 import { globalStyles } from "../../src/styles/globalStyles";
-import { colors, spacing, radius, fontSizes } from "../../src/theme/theme";
+import { colors, fontSizes, radius, spacing } from "../../src/theme/theme";
+
+import { selectExpenses } from "../../src/redux/expenseSelectors";
 
 export default function Home() {
-  const dispatch = useDispatch();
   const router = useRouter();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const username = useSelector(selectUsername) || "there";
 
-  const [quote, setQuote] = useState(null);
-  const [quoteAuthor, setQuoteAuthor] = useState(null);
-  const [quoteLoading, setQuoteLoading] = useState(false);
-  const [quoteError, setQuoteError] = useState("");
+  // Get expenses from Redux
+  const expenses = useSelector(selectExpenses);
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(16)).current;
+  // Calculate total spent
+ const totalSpent = expenses.reduce(
+  (sum: number, e: any) => sum + Number(e.amount),
+  0
+);
 
-  if (!isAuthenticated) {
-    return <Redirect href="/login" />;
-  }
+
+  // Budget (static for now)
+  const BUDGET = 2000;
+
+  // --- Animations ---
+  const fadeAnim = useRef(new Animated.Value(0)).current; // fade in
+  const slideAnim = useRef(new Animated.Value(20)).current; // slide up
+  const numberAnim = useRef(new Animated.Value(0)).current; // number counter
+  const barAnim = useRef(new Animated.Value(0)).current; // progress bar
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 500,
+        duration: 600,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 500,
+        duration: 600,
         useNativeDriver: true,
       }),
+      Animated.timing(numberAnim, {
+        toValue: totalSpent,
+        duration: 800,
+        useNativeDriver: false,
+      }),
+      Animated.timing(barAnim, {
+        toValue: totalSpent / BUDGET,
+        duration: 800,
+        useNativeDriver: false,
+      }),
     ]).start();
-  }, [fadeAnim, slideAnim]);
-
-  const fetchQuote = async () => {
-    setQuoteLoading(true);
-    setQuoteError("");
-    setQuote(null);
-    setQuoteAuthor(null);
-
-    try {
-      const res = await fetch("https://zenquotes.io/api/random");
-
-      if (!res.ok) {
-        throw new Error("Failed request");
-      }
-
-      const data = await res.json();
-
-      const item = Array.isArray(data) ? data[0] : null;
-
-      const text = item?.q;
-      const author = item?.a;
-
-      if (!text) {
-        throw new Error("Missing quote field");
-      }
-
-      setQuote(text);
-      setQuoteAuthor(author || null);
-    } catch (error) {
-      console.log("ZenQuotes error:", error);
-      setQuoteError("Could not load a quote.");
-    } finally {
-      setQuoteLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchQuote();
-  }, []);
-
-  const handleLogout = () => {
-    dispatch(logout());
-  };
-
-  const goToCategoryDetails = () => {
-    router.push({
-      pathname: "/category-details",
-      params: {
-        categoryId: "food",
-        categoryName: "Food & Dining",
-        totalSpent: "430.5",
-      },
-    });
-  };
+  }, [totalSpent]);
 
   return (
     <Screen scroll>
-      <View style={styles.headerRow}>
-        <View>
-          <Text style={styles.greeting}>Hi, {username}</Text>
-          <Text style={styles.subGreeting}>Overview of this month&apos;s spending.</Text>
-        </View>
-        <PrimaryButton
-          title="Logout"
-          onPress={handleLogout}
-          style={styles.logoutButton}
-          textStyle={styles.logoutText}
-        />
-      </View>
+      {/* Header */}
+      <Text style={styles.header}>Hi, Team!</Text>
+      <Text style={styles.subHeader}>Overview of this month's spending.</Text>
 
+      {/* Summary Card */}
       <Animated.View
         style={[
           styles.summaryCard,
@@ -120,152 +76,136 @@ export default function Home() {
         ]}
       >
         <Text style={styles.summaryLabel}>This month</Text>
-        <Text style={styles.summaryNumber}>$1,250.00</Text>
-        <Text style={styles.summarySub}>Budget: $2,000.00</Text>
 
+        {/* Animated number */}
+        <Animated.Text style={styles.summaryNumber}>
+          {numberAnim.interpolate({
+            inputRange: [0, totalSpent],
+            outputRange: ["0", totalSpent.toFixed(0)],
+          })}
+        </Animated.Text>
+
+        <Text style={styles.summarySub}>Budget: ${BUDGET.toFixed(2)}</Text>
+
+        {/* Animated progress bar */}
+        <View style={styles.progressBackground}>
+          <Animated.View
+            style={[
+              styles.progressFill,
+              {
+                width: barAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ["0%", "100%"],
+                }),
+              },
+            ]}
+          />
+        </View>
+
+        {/* Buttons */}
         <View style={styles.summaryButtonsRow}>
           <PrimaryButton
             title="View budget"
-            onPress={() => router.push("/(tabs)/budget")}
+            onPress={() => router.push("/budget")}
             style={styles.summaryButton}
           />
-          <PrimaryButton title="Food details" onPress={goToCategoryDetails} style={styles.summaryButtonAlt} />
+          <PrimaryButton
+            title="Food details"
+            onPress={() =>
+              router.push({
+                pathname: "/category-details",
+                params: {
+                  categoryId: "food",
+                  categoryName: "Food & Dining",
+                },
+              })
+            }
+            style={styles.summaryButtonAlt}
+          />
         </View>
       </Animated.View>
 
-      <Card style={styles.quoteCard}>
-        <View style={styles.quoteHeaderRow}>
-          <Text style={globalStyles.sectionTitle}>Your inspiration for today!</Text>
-          <PrimaryButton
-            title="Refresh"
-            onPress={fetchQuote}
-            style={styles.refreshButton}
-            textStyle={styles.refreshText}
-          />
-        </View>
-
-        {quoteLoading && <ActivityIndicator color={colors.info} style={{ marginVertical: spacing.sm }} />}
-
-        {quoteError ? (
-          <Text style={styles.quoteError}>{quoteError}</Text>
-        ) : quote ? (
-          <>
-            <Text style={styles.quoteText}>"{quote}"</Text>
-            {quoteAuthor && <Text style={styles.quoteAuthor}>— {quoteAuthor}</Text>}
-          </>
-        ) : (
-          !quoteLoading && <Text style={styles.quoteMuted}>No quote loaded. Use refresh to try again.</Text>
-        )}
+      {/* Quote Placeholder */}
+      <Card style={{ marginTop: spacing.lg }}>
+        <Text style={globalStyles.sectionTitle}>Your inspiration for today!</Text>
+        <Text style={styles.quoteError}>Could not load a quote.</Text>
       </Card>
 
-      <Card style={styles.linksCard}>
+      {/* Navigation */}
+      <Card style={{ marginTop: spacing.lg }}>
         <Text style={globalStyles.sectionTitle}>Navigate</Text>
+
         <PrimaryButton
           title="Transactions"
-          onPress={() => router.push("/(tabs)/transactions")}
+          onPress={() => router.push("/transactions")}
           style={styles.linkButton}
         />
-        <PrimaryButton title="Goals" onPress={() => router.push("/(tabs)/goals")} style={styles.linkButton} />
+
+        <PrimaryButton
+          title="Goals"
+          onPress={() => router.push("/goals")}
+          style={styles.linkButton}
+        />
       </Card>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacing.lg,
-  },
-  greeting: {
+  header: {
     color: colors.text,
     fontSize: fontSizes.lg,
     fontWeight: "700",
+    marginTop: spacing.lg,
   },
-  subGreeting: {
+  subHeader: {
     color: colors.muted,
     fontSize: fontSizes.sm,
-    marginTop: spacing.xs,
-  },
-  logoutButton: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    backgroundColor: colors.cardAlt,
-  },
-  logoutText: {
-    fontSize: fontSizes.xs,
+    marginBottom: spacing.lg,
   },
   summaryCard: {
     backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: spacing.lg,
-    marginBottom: spacing.lg,
   },
   summaryLabel: {
     color: colors.muted,
     fontSize: fontSizes.sm,
-    marginBottom: spacing.xs,
   },
   summaryNumber: {
     color: colors.text,
-    fontSize: fontSizes.xl,
+    fontSize: 36,
     fontWeight: "700",
+    marginVertical: spacing.sm,
   },
   summarySub: {
     color: colors.muted,
     fontSize: fontSizes.xs,
-    marginTop: spacing.xs,
     marginBottom: spacing.md,
+  },
+  progressBackground: {
+    height: 10,
+    backgroundColor: colors.cardAlt,
+    borderRadius: radius.sm,
+    overflow: "hidden",
+    marginBottom: spacing.md,
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: colors.primary,
   },
   summaryButtonsRow: {
     flexDirection: "row",
     gap: spacing.sm,
   },
-  summaryButton: {
-    flex: 1,
-  },
+  summaryButton: { flex: 1 },
   summaryButtonAlt: {
     flex: 1,
     backgroundColor: colors.cardAlt,
   },
-  quoteCard: {
-    marginBottom: spacing.lg,
-  },
-  quoteHeaderRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacing.sm,
-  },
-  refreshButton: {
-    backgroundColor: colors.cardAlt,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  refreshText: {
-    fontSize: fontSizes.xs,
-  },
-  quoteText: {
-    color: colors.text,
-    fontSize: fontSizes.sm,
-    lineHeight: 20,
-  },
-  quoteAuthor: {
-    color: colors.muted,
-    fontSize: fontSizes.xs,
-    marginTop: spacing.sm,
-  },
-  quoteMuted: {
-    color: colors.muted,
-    fontSize: fontSizes.sm,
-  },
   quoteError: {
     color: colors.danger,
-    fontSize: fontSizes.sm,
-  },
-  linksCard: {
-    marginBottom: spacing.lg,
+    marginTop: spacing.sm,
   },
   linkButton: {
     marginTop: spacing.sm,
