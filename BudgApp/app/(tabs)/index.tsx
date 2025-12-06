@@ -18,15 +18,15 @@ export default function Home() {
   // Get expenses from Redux
   const expenses = useSelector(selectExpenses);
 
+  // Get budget from Redux
+  const BUDGET = useSelector((state: any) => state.budget.budget)
+
   // Calculate total spent
  const totalSpent = expenses.reduce(
   (sum: number, e: any) => sum + Number(e.amount),
   0
 );
 
-
-  // Budget (static for now)
-  const BUDGET = 2000;
 
   // --- Animations ---
   const fadeAnim = useRef(new Animated.Value(0)).current; // fade in
@@ -106,7 +106,7 @@ export default function Home() {
         <View style={styles.summaryButtonsRow}>
           <PrimaryButton
             title="View budget"
-            onPress={() => router.push("/budget")}
+            onPress={() => router.push("/(tabs)/budget")}
             style={styles.summaryButton}
           />
           <PrimaryButton
