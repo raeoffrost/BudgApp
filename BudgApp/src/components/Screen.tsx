@@ -5,7 +5,7 @@ import { globalStyles } from "../styles/globalStyles";
 import { colors } from "../theme/theme";
 
 type ScreenProps = {
-  children: ReactNode;
+  children?: ReactNode;
   scroll?: boolean;
   centered?: boolean;
   style?: StyleProp<ViewStyle>;

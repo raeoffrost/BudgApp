@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import { useSelector } from "react-redux";
 
 import Card from "../../src/components/Card";
@@ -11,6 +11,8 @@ import { globalStyles } from "../../src/styles/globalStyles";
 import { colors, fontSizes, radius, spacing } from "../../src/theme/theme";
 
 import { selectExpenses } from "../../src/redux/expenseSelectors";
+import { fetchQuoteSafe } from "../../src/api/api";
+import ErrorBanner from "../../components/ErrorBanner";
 
 export default function Home() {
   const router = useRouter();
@@ -26,6 +28,40 @@ export default function Home() {
   (sum: number, e: any) => sum + Number(e.amount),
   0
 );
+
+  // Quote state
+  const [quote, setQuote] = useState<string | null>(null);
+  const [quoteAuthor, setQuoteAuthor] = useState<string | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+
+  const fetchQuote = async () => {
+    setQuoteLoading(true);
+    setQuoteError(null);
+    setQuote(null);
+    setQuoteAuthor(null);
+
+    try {
+      const result = await fetchQuoteSafe();
+
+      if (!result || !result.text) {
+        throw new Error("Missing quote");
+      }
+
+      setQuote(result.text);
+      setQuoteAuthor(result.author || null);
+    } catch (error) {
+      console.log("Quote error:", error);
+      setQuoteError("Could not load a quote.");
+    } finally {
+      setQuoteLoading(false);
+    }
+  };
+
+  // Load quote on first mount
+  useEffect(() => {
+    fetchQuote();
+  }, []);
 
 
   // --- Animations ---
@@ -125,11 +161,45 @@ export default function Home() {
         </View>
       </Animated.View>
 
-      {/* Quote Placeholder */}
+            {/* Quote section */}
       <Card style={{ marginTop: spacing.lg }}>
-        <Text style={globalStyles.sectionTitle}>Your inspiration for today!</Text>
-        <Text style={styles.quoteError}>Could not load a quote.</Text>
+        <View style={styles.quoteHeaderRow}>
+          <Text style={globalStyles.sectionTitle}>Your inspiration for today!</Text>
+          <PrimaryButton
+            title="Refresh"
+            onPress={fetchQuote}
+            style={styles.refreshButton}
+            textStyle={styles.refreshText}
+          />
+        </View>
+
+        {quoteLoading && !quoteError && (
+          <ActivityIndicator
+            color={colors.info}
+            style={{ marginVertical: spacing.sm }}
+          />
+        )}
+
+        {/* Error banner with Retry */}
+        <ErrorBanner message={quoteError || ""} onRetry={fetchQuote} />
+
+        {/* Normal quote / empty states (only when no error) */}
+        {!quoteLoading && !quoteError && quote && (
+          <>
+            <Text style={styles.quoteText}>"{quote}"</Text>
+            {quoteAuthor && (
+              <Text style={styles.quoteAuthor}>— {quoteAuthor}</Text>
+            )}
+          </>
+        )}
+
+        {!quoteLoading && !quoteError && !quote && (
+          <Text style={styles.quoteMuted}>
+            No quote loaded. Use refresh to try again.
+          </Text>
+        )}
       </Card>
+
 
       {/* Navigation */}
       <Card style={{ marginTop: spacing.lg }}>
@@ -203,6 +273,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.cardAlt,
   },
+  quoteHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: spacing.sm,
+  },
+  refreshButton: {
+    backgroundColor: colors.cardAlt,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  refreshText: {
+    fontSize: fontSizes.xs,
+  },
+  quoteText: {
+    color: colors.text,
+    fontSize: fontSizes.sm,
+    lineHeight: 20,
+  },
+  quoteAuthor: {
+    color: colors.muted,
+    fontSize: fontSizes.xs,
+    marginTop: spacing.sm,
+  },
+  quoteMuted: {
+    color: colors.muted,
+    fontSize: fontSizes.sm,
+  },
   quoteError: {
     color: colors.danger,
     marginTop: spacing.sm,
@@ -211,3 +309,4 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
 });
+

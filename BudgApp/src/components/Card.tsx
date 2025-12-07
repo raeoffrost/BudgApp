@@ -3,7 +3,7 @@ import { Animated, StyleProp, ViewStyle } from "react-native";
 import { colors, spacing, radius } from "../theme/theme";
 
 type CardProps = {
-  children: ReactNode;
+  children?: ReactNode;
   style?: StyleProp<ViewStyle>;
   delay?: number; // optional stagger
 };
