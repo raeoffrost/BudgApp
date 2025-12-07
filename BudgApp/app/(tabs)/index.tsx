@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, StyleSheet, Text, View, ActivityIndicator } from "react-native";
+import { ActivityIndicator, Animated, StyleSheet, Text, View } from "react-native";
 import { useSelector } from "react-redux";
 
 import Card from "../../src/components/Card";
@@ -10,9 +10,10 @@ import Screen from "../../src/components/Screen";
 import { globalStyles } from "../../src/styles/globalStyles";
 import { colors, fontSizes, radius, spacing } from "../../src/theme/theme";
 
-import { selectExpenses } from "../../src/redux/expenseSelectors";
+import ErrorBanner from "@/components/ErrorBanner";
 import { fetchQuoteSafe } from "../../src/api/api";
-import ErrorBanner from "../../components/ErrorBanner";
+import { selectExpenses } from "../../src/redux/expenseSelectors";
+
 
 export default function Home() {
   const router = useRouter();

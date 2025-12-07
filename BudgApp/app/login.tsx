@@ -27,12 +27,6 @@ export default function Login() {
   const handleLoginPress = async () => {
     setError("");
 
-    // ⭐ NEW: require username
-    if (!username.trim()) {
-      setError("Enter your name.");
-      return;
-    }
-
     if (!password.trim()) {
       setError("Enter a password.");
       return;
@@ -63,7 +57,7 @@ export default function Login() {
         <Text style={styles.appTitle}>BudgApp</Text>
         <Text style={styles.subtitle}>Track monthly spending and goals.</Text>
 
-        <Text style={styles.label}>Name*</Text>
+        <Text style={styles.label}>Name (optional)</Text>
         <TextInput
           style={styles.input}
           placeholder="Name"

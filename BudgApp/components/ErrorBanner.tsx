@@ -1,7 +1,12 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { colors, fontSizes, radius, spacing } from "../theme/theme";
+import { colors, fontSizes, radius, spacing } from "../src/theme/theme";
 
-export default function ErrorBanner({ message, onRetry }) {
+type Props = {
+  message?: string | null;
+  onRetry?: () => void;
+};
+
+export default function ErrorBanner({ message, onRetry }: Props) {
   if (!message) return null;
 
   return (
