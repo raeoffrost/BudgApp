@@ -48,7 +48,7 @@ export default function Transactions() {
               <View style={styles.itemRow}>
                 <View style={styles.itemText}>
                   <Text style={styles.amount}>${item.amount.toFixed(2)}</Text>
-                  <Text style={styles.category}>{item.category}</Text>
+                  <Text style={styles.category}>{item.description|| item.category}</Text>
                   <Text style={styles.note}>{item.note || "No note"}</Text>
                 </View>
 

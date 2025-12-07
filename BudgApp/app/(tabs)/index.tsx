@@ -11,15 +11,24 @@ import { globalStyles } from "../../src/styles/globalStyles";
 import { colors, fontSizes, radius, spacing } from "../../src/theme/theme";
 
 import ErrorBanner from "@/components/ErrorBanner";
+import { Redirect } from "expo-router";
+import { useDispatch } from "react-redux";
 import { fetchQuoteSafe } from "../../src/api/api";
 import { selectExpenses } from "../../src/redux/expenseSelectors";
-
+import { logout, selectIsAuthenticated, selectUsername } from "../../src/redux/userReducer";
 
 export default function Home() {
+
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+
   const router = useRouter();
 
   // Get expenses from Redux
   const expenses = useSelector(selectExpenses);
+
+   const dispatch = useDispatch();
+  const username = useSelector(selectUsername) || "there";
+
 
   // Get budget from Redux
   const BUDGET = useSelector((state: any) => state.budget.budget)
@@ -35,6 +44,14 @@ export default function Home() {
   const [quoteAuthor, setQuoteAuthor] = useState<string | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
+
+
+  const handleLogout = () => {
+    // clear auth in Redux
+    dispatch(logout());
+    // go back to login screen
+    router.replace("/login");
+  };
 
   const fetchQuote = async () => {
     setQuoteLoading(true);
@@ -96,11 +113,27 @@ export default function Home() {
     ]).start();
   }, [totalSpent]);
 
+   if (!isAuthenticated) {
+    return <Redirect href="/login" />;
+  }
+
+  
   return (
     <Screen scroll>
-      {/* Header */}
-      <Text style={styles.header}>Hi, Team!</Text>
+  <View style={styles.headerRow}>
+    <View>
+      <Text style={styles.header}>Hi, {username}</Text>
       <Text style={styles.subHeader}>Overview of this month's spending.</Text>
+    </View>
+
+    <PrimaryButton
+      title="Logout"
+      onPress={handleLogout}
+      style={styles.logoutButton}
+      textStyle={styles.logoutText}
+    />
+  </View>
+
 
       {/* Summary Card */}
       <Animated.View
@@ -308,6 +341,21 @@ const styles = StyleSheet.create({
   },
   linkButton: {
     marginTop: spacing.sm,
+  },
+ headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  logoutButton: {
+    backgroundColor: colors.cardAlt,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+ logoutText: {
+    fontSize: fontSizes.xs,
   },
 });
 

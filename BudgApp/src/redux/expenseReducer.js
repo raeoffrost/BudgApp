@@ -20,16 +20,17 @@ const expenseSlice = createSlice({
       state.push(action.payload);
     },
 
-    // ---- Update an existing expense by ID ----
+    // Update an existing ID
     updateExpense: (state, action) => {
       const updated = action.payload;
-      const index = state.findIndex((item) => item.id === updated.id);
+      const targetId = String(updated.id); 
+      const index = state.findIndex((item) => String(item.id) === targetId);
       if (index !== -1) {
-        state[index] = updated;
+        state[index] = { ...state[index], ...updated }
       }
     },
 
-    // ---- Delete an expense by ID (Step 1) ----
+    // Delete Expense by ID
     deleteExpense: (state, action) => {
       const id = action.payload;
       return state.filter((item) => item.id !== id);
