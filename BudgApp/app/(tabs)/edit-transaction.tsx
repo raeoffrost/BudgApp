@@ -51,22 +51,31 @@ export default function EditTransaction() {
   };
 
   // --- Delete Transaction ---
-  const removeTransaction = () => {
-    Alert.alert(
-      "Delete Transaction",
-      "Are you sure you want to remove this transaction?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            dispatch(deleteExpense(transactionId));
-            router.replace("/transactions");
-          },
-        },
-      ]
-    );
+  // const removeTransaction = () => {
+  //   Alert.alert(
+  //     "Delete Transaction",
+  //     "Are you sure you want to remove this transaction?",
+  //     [
+  //       { text: "Cancel", style: "cancel" },
+  //       {
+  //         text: "Delete",
+  //         style: "destructive",
+  //         onPress: () => {
+  //           dispatch(deleteExpense(transactionId));
+  //           router.replace("/transactions");
+  //         },
+  //       },
+  //     ]
+  //   );
+  // };
+
+    const handleDelete = (id: number | string) => {
+      dispatch(deleteExpense(id));
+      router.replace("/transactions");    
+    };
+
+      const cancel = () => {
+    router.push("/transactions");
   };
 
   return (
@@ -93,10 +102,13 @@ export default function EditTransaction() {
 
         <PrimaryButton
           title="Delete Transaction"
-          onPress={removeTransaction}
+          onPress={() => handleDelete(transactionId)}
           style={{ backgroundColor: colors.danger, marginTop: spacing.md }}
         />
+
+        <PrimaryButton title="Come back to Transactions" onPress={cancel} style={{ marginTop: spacing.md, backgroundColor: colors.card }} />
       </Card>
+
     </Screen>
   );
 }

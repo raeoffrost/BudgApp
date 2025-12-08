@@ -33,7 +33,7 @@ const expenseSlice = createSlice({
     // Delete Expense by ID
     deleteExpense: (state, action) => {
       const id = action.payload;
-      return state.filter((item) => item.id !== id);
+      return state.filter((item) => String(item.id) !== id);
     },
   },
 });

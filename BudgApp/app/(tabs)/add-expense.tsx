@@ -9,14 +9,13 @@ import { colors, fontSizes, spacing } from "../../src/theme/theme";
 import { useRouter } from "expo-router";
 import { selectCategories } from "../../src/redux/categoryReducer";
 import { Picker } from '@react-native-picker/picker';
-import { Background } from "@react-navigation/elements";
 import { globalStyles } from "../../src/styles/globalStyles";
+import { Background } from "@react-navigation/elements";
 
 export default function AddExpense() {
   const router = useRouter();
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories)  || [];
-  // const categories = useSelector((state: any) => state.categories.categories) as any[] || [];
 
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -96,7 +95,7 @@ export default function AddExpense() {
         />
 
         <PrimaryButton title="Save Expense" onPress={onSave} style={{ marginTop: spacing.md }} />
-        <PrimaryButton title="Cancel" onPress={cancel} style={{ marginTop: spacing.md }} />
+        <PrimaryButton title="Come back to Transactions" onPress={cancel} style={{ marginTop: spacing.md, backgroundColor: colors.card }} />
       </Card>
     </Screen>
   );

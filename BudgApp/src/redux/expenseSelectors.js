@@ -21,8 +21,8 @@ export const selectCategoryTotal = (categoryId) =>
       .reduce((sum, e) => sum + Number(e.amount), 0);
   });
 
-// Monthly total (all expenses) ----------------------------------
-export const selectMonthlyTotal = createSelector(
+// Total (all expenses) ----------------------------------
+export const selectTotal = createSelector(
   [selectExpenses],
   (expenses) => {
     if (!Array.isArray(expenses)) return 0;
@@ -31,8 +31,8 @@ export const selectMonthlyTotal = createSelector(
 );
 
 // New: Convert monthly total to selected currency ----------------
-export const selectMonthlyTotalInCurrency = (rate) =>
-  createSelector([selectMonthlyTotal], (total) => {
+export const selectTotalInCurrency = (rate) =>
+  createSelector([selectTotal], (total) => {
     if (!rate) return total;
     return total * rate;
   });

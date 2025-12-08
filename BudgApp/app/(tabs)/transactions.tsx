@@ -9,16 +9,16 @@ import { deleteExpense } from "../../src/redux/expenseReducer";
 import { globalStyles } from "../../src/styles/globalStyles";
 import { colors, fontSizes, spacing } from "../../src/theme/theme";
 import { selectCategories } from "../../src/redux/categoryReducer";
+import { selectTotal } from "../../src/redux/expenseSelectors";
 
 export default function Transactions() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  // get all expenses from Redux
+  // get data from Redux
   const expenses = useSelector((state: any) => state.expenses) || [];
-
-  // get all categoriesx
   const categories = useSelector(selectCategories) || [];
+  const expensesTotal = useSelector(selectTotal);
 
   const handleDelete = (id: number | string) => {
     dispatch(deleteExpense(id));
@@ -38,11 +38,11 @@ export default function Transactions() {
   };
 
   const getCategoryIcon = (expenseItem: any) => {
-  const categoryObj = categories.find((cat: any) => cat.name === expenseItem.category);
-  return categoryObj ? categoryObj.icon : "❓";
-};
+    const categoryObj = categories.find((cat: any) => cat.name === expenseItem.category);
+    return categoryObj ? categoryObj.icon : "❓";
+  };
 
- 
+
   return (
     <Screen>
       <Card>
@@ -51,30 +51,35 @@ export default function Transactions() {
         {expenses.length === 0 ? (
           <Text style={styles.empty}>No expenses yet. Add one!</Text>
         ) : (
-          <FlatList
-            data={expenses}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
+          <>
 
-              <View style={styles.itemRow}>
-                <View style={styles.itemText}>
-                  <Text style={styles.amount}>${item.amount.toFixed(2)}</Text>
-                  <Text style={styles.category}>{getCategoryIcon(item)}</Text>
-                  <Text style={styles.note}>{item.note || "No note"}</Text>
-                </View>
+            <FlatList
+              data={expenses}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <Pressable onPress={() => goToEdit(item)}>
+                  <View style={styles.itemRow}>
+                    <View style={styles.itemText}>
+                      <Text style={styles.amount}>${item.amount.toFixed(2)}</Text>
+                      <Text style={styles.category}>{getCategoryIcon(item)}</Text>
+                      <Text style={styles.note}>{item.note || "No note"}</Text>
+                    </View>
 
-                <View style={styles.actions}>
-                  <Pressable onPress={() => goToEdit(item)} style={styles.editBtn}>
-                    <Text style={styles.editText}>Edit</Text>
-                  </Pressable>
+                    <View style={styles.actions}>
+                      <Pressable onPress={() => goToEdit(item)} style={styles.editBtn}>
+                        <Text style={styles.editText}>Edit</Text>
+                      </Pressable>
 
-                  <Pressable onPress={() => handleDelete(item.id)} style={styles.deleteBtn}>
-                    <Text style={styles.deleteText}>Delete</Text>
-                  </Pressable>
-                </View>
-              </View>
-            )}
-          />
+                      <Pressable onPress={() => handleDelete(item.id)} style={styles.deleteBtn}>
+                        <Text style={styles.deleteText}>Delete</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                </Pressable>
+              )}
+            />
+            <Text style={styles.totalText}>Total:   ${expensesTotal}</Text>
+          </>
         )}
 
         <PrimaryButton
@@ -139,4 +144,9 @@ const styles = StyleSheet.create({
     color: colors.danger,
     fontSize: fontSizes.xs,
   },
+  totalText: {
+    color: colors.text,
+    fontSize: fontSizes.md,
+    marginTop: 20,
+  }
 });
