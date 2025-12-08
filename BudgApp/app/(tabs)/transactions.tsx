@@ -8,13 +8,17 @@ import Screen from "../../src/components/Screen";
 import { deleteExpense } from "../../src/redux/expenseReducer";
 import { globalStyles } from "../../src/styles/globalStyles";
 import { colors, fontSizes, spacing } from "../../src/theme/theme";
+import { selectCategories } from "../../src/redux/categoryReducer";
 
 export default function Transactions() {
   const router = useRouter();
   const dispatch = useDispatch();
 
   // get all expenses from Redux
-  const expenses = useSelector((state: any) => state.expenses);
+  const expenses = useSelector((state: any) => state.expenses) || [];
+
+  // get all categoriesx
+  const categories = useSelector(selectCategories) || [];
 
   const handleDelete = (id: number | string) => {
     dispatch(deleteExpense(id));
@@ -33,6 +37,12 @@ export default function Transactions() {
     });
   };
 
+  const getCategoryIcon = (expenseItem: any) => {
+  const categoryObj = categories.find((cat: any) => cat.name === expenseItem.category);
+  return categoryObj ? categoryObj.icon : "❓";
+};
+
+ 
   return (
     <Screen>
       <Card>
@@ -45,10 +55,11 @@ export default function Transactions() {
             data={expenses}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
+
               <View style={styles.itemRow}>
                 <View style={styles.itemText}>
                   <Text style={styles.amount}>${item.amount.toFixed(2)}</Text>
-                  <Text style={styles.category}>{item.description|| item.category}</Text>
+                  <Text style={styles.category}>{getCategoryIcon(item)}</Text>
                   <Text style={styles.note}>{item.note || "No note"}</Text>
                 </View>
 
@@ -91,17 +102,22 @@ const styles = StyleSheet.create({
   },
   itemText: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
   },
   amount: {
+    width: 90,
     color: colors.primary,
     fontSize: fontSizes.md,
     fontWeight: "600",
   },
   category: {
+    width: 40,
     color: colors.text,
     fontSize: fontSizes.sm,
   },
   note: {
+    width: 150,
     color: colors.muted,
     fontSize: fontSizes.xs,
   },

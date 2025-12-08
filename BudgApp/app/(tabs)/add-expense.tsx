@@ -1,14 +1,22 @@
 import React, { useState } from "react";
 import { Alert, StyleSheet, Text, TextInput } from "react-native";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import Card from "../../src/components/Card";
 import PrimaryButton from "../../src/components/PrimaryButton";
 import Screen from "../../src/components/Screen";
 import { addExpense } from "../../src/redux/expenseReducer";
 import { colors, fontSizes, spacing } from "../../src/theme/theme";
+import { useRouter } from "expo-router";
+import { selectCategories } from "../../src/redux/categoryReducer";
+import { Picker } from '@react-native-picker/picker';
+import { Background } from "@react-navigation/elements";
+import { globalStyles } from "../../src/styles/globalStyles";
 
 export default function AddExpense() {
+  const router = useRouter();
   const dispatch = useDispatch();
+  const categories = useSelector(selectCategories)  || [];
+  // const categories = useSelector((state: any) => state.categories.categories) as any[] || [];
 
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -22,12 +30,12 @@ export default function AddExpense() {
 
     dispatch(
       addExpense({
-        id: Date.now(),                   
-        amount: Number(amount),          
-        category,                        
-        note,                             
-        description: note || category,    
-        date: new Date().toISOString(),   
+        id: Date.now(),
+        amount: Number(amount),
+        category,
+        note,
+        description: note || category,
+        date: new Date().toISOString(),
       })
     );
 
@@ -37,11 +45,24 @@ export default function AddExpense() {
     setAmount("");
     setCategory("");
     setNote("");
+
+    router.push("/transactions");
+  };
+
+  const cancel = () => {
+
+    // Reset fields
+    setAmount("");
+    setCategory("");
+    setNote("");
+
+    router.push("/transactions");
   };
 
   return (
     <Screen>
       <Card>
+        <Text style={globalStyles.title}>Add new Expense</Text>
 
         <Text style={styles.label}>Amount</Text>
         <TextInput
@@ -54,13 +75,16 @@ export default function AddExpense() {
         />
 
         <Text style={styles.label}>Category</Text>
-        <TextInput
-          style={styles.input}
-          value={category}
-          onChangeText={setCategory}
-          placeholder="Enter category"
-          placeholderTextColor={colors.muted}
-        />
+        <Picker
+          selectedValue={category}
+          onValueChange={setCategory}
+          style={[styles.input, { backgroundColor: colors.card}]}
+        >
+          <Picker.Item label="Select a category" value=""/>
+          {categories.map((cat: any) => (
+            <Picker.Item key={cat.id} label={`${cat.icon} ${cat.name}`} value={cat.name} />
+          ))}
+        </Picker>
 
         <Text style={styles.label}>Note (optional)</Text>
         <TextInput
@@ -72,6 +96,7 @@ export default function AddExpense() {
         />
 
         <PrimaryButton title="Save Expense" onPress={onSave} style={{ marginTop: spacing.md }} />
+        <PrimaryButton title="Cancel" onPress={cancel} style={{ marginTop: spacing.md }} />
       </Card>
     </Screen>
   );
