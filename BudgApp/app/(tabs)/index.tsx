@@ -28,7 +28,7 @@ import {
 import { setQuote } from "../../src/redux/APIreducer";
 
 export default function Home() {
-  // 🔹 All hooks declared first
+  
   const router = useRouter();
   const dispatch = useDispatch();
 
