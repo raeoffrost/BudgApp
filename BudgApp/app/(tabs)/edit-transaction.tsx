@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Alert, StyleSheet, Text, TextInput } from "react-native";
 import { useDispatch } from "react-redux";
 import Card from "../../src/components/Card";
@@ -8,10 +8,14 @@ import Screen from "../../src/components/Screen";
 import { deleteExpense, updateExpense } from "../../src/redux/expenseReducer";
 import { globalStyles } from "../../src/styles/globalStyles";
 import { colors, fontSizes, spacing } from "../../src/theme/theme";
+import { Picker } from "@react-native-picker/picker";
+import { useSelector } from "react-redux";
+import { selectCategories } from "../../src/redux/categoryReducer";
 
 export default function EditTransaction() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const categories = useSelector(selectCategories) || [];
 
   const params = useLocalSearchParams();
 
@@ -20,61 +24,58 @@ export default function EditTransaction() {
     ? params.transactionId[0]
     : params.transactionId || "";
 
-  const [description, setDescription] = useState(
-    Array.isArray(params.initialDescription)
-      ? params.initialDescription[0]
-      : params.initialDescription || ""
-  );
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
 
-  const [amount, setAmount] = useState(
-    Array.isArray(params.initialAmount)
-      ? params.initialAmount[0]
-      : params.initialAmount || ""
-  );
+
+  useEffect(() => {
+    setAmount(
+      Array.isArray(params.initialAmount)
+        ? params.initialAmount[0]
+        : params.initialAmount || ""
+    );
+
+    setCategory(
+      Array.isArray(params.initialCategory)
+        ? params.initialCategory[0]
+        : params.initialCategory || ""
+    );
+
+    setDescription(
+      Array.isArray(params.initialDescription)
+        ? params.initialDescription[0]
+        : params.initialDescription || ""
+    );
+
+
+  }, [params.transactionId]);
 
   // --- Update Transaction ---
   const saveChanges = () => {
-    if (!description || !amount) {
+    if (!amount || !category) {
       Alert.alert("Missing fields", "Please fill in all fields.");
       return;
     }
 
-    dispatch(
-      updateExpense({
-        id: transactionId,
-        description,
-        amount: Number(amount),
-      })
+  dispatch(
+    updateExpense({
+      id: transactionId,
+      amount: Number(amount),
+      category,
+      note: description, 
+    })
     );
 
     router.replace("/transactions");
   };
 
-  // --- Delete Transaction ---
-  // const removeTransaction = () => {
-  //   Alert.alert(
-  //     "Delete Transaction",
-  //     "Are you sure you want to remove this transaction?",
-  //     [
-  //       { text: "Cancel", style: "cancel" },
-  //       {
-  //         text: "Delete",
-  //         style: "destructive",
-  //         onPress: () => {
-  //           dispatch(deleteExpense(transactionId));
-  //           router.replace("/transactions");
-  //         },
-  //       },
-  //     ]
-  //   );
-  // };
+  const handleDelete = (id: number | string) => {
+    dispatch(deleteExpense(id));
+    router.replace("/transactions");
+  };
 
-    const handleDelete = (id: number | string) => {
-      dispatch(deleteExpense(id));
-      router.replace("/transactions");    
-    };
-
-      const cancel = () => {
+  const cancel = () => {
     router.push("/transactions");
   };
 
@@ -83,19 +84,31 @@ export default function EditTransaction() {
       <Card>
         <Text style={globalStyles.title}>Edit Transaction</Text>
 
-        <Text style={styles.label}>Description</Text>
-        <TextInput
-          style={styles.input}
-          value={description}
-          onChangeText={setDescription}
-        />
-
         <Text style={styles.label}>Amount</Text>
         <TextInput
           style={styles.input}
           value={amount}
           keyboardType="numeric"
           onChangeText={setAmount}
+        />
+
+        <Text style={styles.label}>Category</Text>
+        <Picker
+          selectedValue={category}
+          onValueChange={setCategory}
+          style={[styles.input, { backgroundColor: colors.card }]}
+        >
+          <Picker.Item label="Choose a category" value="" />
+          {categories.map((cat: any) => (
+            <Picker.Item key={cat.id} label={`${cat.icon} ${cat.name}`} value={cat.name} />
+          ))}
+        </Picker>
+
+        <Text style={styles.label}>Description</Text>
+        <TextInput
+          style={styles.input}
+          value={description}
+          onChangeText={setDescription}
         />
 
         <PrimaryButton title="Save Changes" onPress={saveChanges} />
@@ -121,7 +134,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: colors.muted, // FIXED!
+    borderColor: colors.muted,
     padding: spacing.sm,
     borderRadius: 8,
     marginBottom: spacing.md,

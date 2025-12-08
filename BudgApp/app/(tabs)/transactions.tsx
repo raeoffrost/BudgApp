@@ -62,7 +62,7 @@ export default function Transactions() {
                     <View style={styles.itemText}>
                       <Text style={styles.amount}>${item.amount.toFixed(2)}</Text>
                       <Text style={styles.category}>{getCategoryIcon(item)}</Text>
-                      <Text style={styles.note}>{item.note || "No note"}</Text>
+                      <Text style={styles.note}>{item.note||"No note"}</Text>
                     </View>
 
                     <View style={styles.actions}>
