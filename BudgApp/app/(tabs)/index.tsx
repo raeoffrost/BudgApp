@@ -49,7 +49,7 @@ export default function Home() {
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [quotePercentChange, setQuotePercentChange] = useState<number>(0);
 
-  // Dropdown state (custom, no Picker)
+  // Dropdown state 
   const [symbol, setSymbol] = useState("AAPL");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const stockOptions = ["AAPL", "TSLA", "MSFT", "AMZN"];
@@ -251,7 +251,7 @@ export default function Home() {
           />
         </View>
 
-        {/* Custom dropdown (no Picker) */}
+        {/* Custom dropdown  */}
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => setDropdownOpen((o) => !o)}
