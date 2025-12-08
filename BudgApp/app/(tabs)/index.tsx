@@ -137,7 +137,7 @@ export default function Home() {
     ]).start();
   }, [totalSpent, BUDGET, quotePercentChange]);
 
-  // 🔹 Conditional return AFTER hooks
+  
   if (!isAuthenticated) {
     return <Redirect href="/login" />;
   }
