@@ -10,6 +10,8 @@ import { globalStyles } from "../../src/styles/globalStyles";
 import { colors, fontSizes, spacing } from "../../src/theme/theme";
 import { selectCategories } from "../../src/redux/categoryReducer";
 import { selectTotal } from "../../src/redux/expenseSelectors";
+import FadeInListItem from "../../src/components/FadeInListItem";
+import AnimatedButton from "../../src/components/AnimatedButton";
 
 export default function Transactions() {
   const router = useRouter();
@@ -57,36 +59,34 @@ export default function Transactions() {
               data={expenses}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
-                <Pressable onPress={() => goToEdit(item)}>
-                  <View style={styles.itemRow}>
-                    <View style={styles.itemText}>
-                      <Text style={styles.amount}>${item.amount.toFixed(2)}</Text>
-                      <Text style={styles.category}>{getCategoryIcon(item)}</Text>
-                      <Text style={styles.note}>{item.note||"No note"}</Text>
-                    </View>
+                <FadeInListItem>
+                  <Pressable onPress={() => goToEdit(item)}>
+                    <View style={styles.itemRow}>
+                      <View style={styles.itemText}>
+                        <Text style={styles.amount}>${item.amount.toFixed(2)}</Text>
+                        <Text style={styles.category}>{getCategoryIcon(item)}</Text>
+                        <Text style={styles.note}>{item.note || "No note"}</Text>
+                      </View>
 
-                    <View style={styles.actions}>
-                      <Pressable onPress={() => goToEdit(item)} style={styles.editBtn}>
-                        <Text style={styles.editText}>Edit</Text>
-                      </Pressable>
+                      <View style={styles.actions}>
+                        <Pressable onPress={() => goToEdit(item)} style={styles.editBtn}>
+                          <Text style={styles.editText}>Edit</Text>
+                        </Pressable>
 
-                      <Pressable onPress={() => handleDelete(item.id)} style={styles.deleteBtn}>
-                        <Text style={styles.deleteText}>Delete</Text>
-                      </Pressable>
+                        <Pressable onPress={() => handleDelete(item.id)} style={styles.deleteBtn}>
+                          <Text style={styles.deleteText}>Delete</Text>
+                        </Pressable>
+                      </View>
                     </View>
-                  </View>
-                </Pressable>
+                  </Pressable>
+                </FadeInListItem>
               )}
             />
             <Text style={styles.totalText}>Total:   ${expensesTotal}</Text>
           </>
         )}
 
-        <PrimaryButton
-          title="Add New Expense"
-          onPress={() => router.push("/add-expense")}
-          style={{ marginTop: spacing.lg }}
-        />
+        <AnimatedButton title="Add New Expense" onPress={() => router.push("/add-expense")} style={{ marginTop: spacing.lg }} />
       </Card>
     </Screen>
   );
