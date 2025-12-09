@@ -11,22 +11,32 @@ type ScreenProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-export default function Screen({ children, scroll = false, centered = false, style }: ScreenProps) {
-  const baseStyle = centered ? globalStyles.screenCentered : globalStyles.screen;
-
-  if (scroll) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top", "right", "bottom", "left"]}>
-        <ScrollView style={baseStyle} contentContainerStyle={{ paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
-          {children}
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
+export default function Screen({
+  children,
+  scroll = false,
+  centered = false,
+  style
+}: ScreenProps) {
+  const baseStyle = centered
+    ? globalStyles.screenCentered
+    : globalStyles.screen;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top", "right", "bottom", "left"]}>
-      <View style={[baseStyle, style]}>{children}</View>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      edges={["top", "right", "bottom", "left"]}
+    >
+      {scroll ? (
+        <ScrollView
+          style={baseStyle}
+          contentContainerStyle={{ paddingBottom: 32 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {children}
+        </ScrollView>
+      ) : (
+        <View style={[baseStyle, style]}>{children}</View>
+      )}
     </SafeAreaView>
   );
 }

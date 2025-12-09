@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, StyleSheet, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useDispatch, useSelector } from "react-redux";
 import { Redirect } from "expo-router";
-import { loginSuccess, selectIsAuthenticated } from "../src/redux/userReducer";
-import { colors, spacing, radius, fontSizes } from "../src/theme/theme";
+import React, { useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, TextInput, View } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import PrimaryButton from "../src/components/PrimaryButton";
 import Screen from "../src/components/Screen";
+import { loginSuccess, selectIsAuthenticated } from "../src/redux/userReducer";
 import { globalStyles } from "../src/styles/globalStyles";
+import { colors, fontSizes, radius, spacing } from "../src/theme/theme";
 
 const PASSWORD_KEY = "@budgapp_password";
 
@@ -91,6 +91,7 @@ export default function Login() {
     </Screen>
   );
 }
+
 
 const styles = StyleSheet.create({
   card: {
