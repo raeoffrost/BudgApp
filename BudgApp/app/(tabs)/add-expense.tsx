@@ -10,23 +10,44 @@ import { useRouter } from "expo-router";
 import { selectCategories } from "../../src/redux/categoryReducer";
 import { Picker } from '@react-native-picker/picker';
 import { globalStyles } from "../../src/styles/globalStyles";
-import { Background } from "@react-navigation/elements";
 
 export default function AddExpense() {
+
   const router = useRouter();
   const dispatch = useDispatch();
-  const categories = useSelector(selectCategories)  || [];
+  const categories = useSelector(selectCategories) || [];
 
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [note, setNote] = useState("");
 
+  // Validate and save expense
   const onSave = () => {
+
+    // validate that amount or category is empty
     if (!amount.trim() || !category.trim()) {
-      Alert.alert("Missing Input", "Amount and category are required.");
+      if (typeof window !== "undefined") {
+        window.alert("Amount and category are required.");
+      } else {
+        Alert.alert("Missing Input", "Amount and category are required.");
+      }
       return;
     }
 
+    // validate that amount is positive number
+    const amountNumber = Number(amount);
+    if (isNaN(amountNumber) || amountNumber <= 0) {
+      if (typeof window !== "undefined") {
+        // Web: use browser confirm dialog
+        window.alert("Please enter a valid positive number for the amount.");
+      } else {
+        // Mobile: use alert
+        Alert.alert("Invalid Amount", "Please enter a valid positive number for the amount.");
+      }
+      return;
+    }
+
+    // save changes
     dispatch(
       addExpense({
         id: Date.now(),
@@ -38,7 +59,14 @@ export default function AddExpense() {
       })
     );
 
-    Alert.alert("Success", "Expense added!");
+    // Alert - Success cnfirmation
+    if (typeof window !== "undefined") {
+      // Web: use browser confirm dialog
+      window.alert("Success \n\n Expense added!");
+    } else {
+      // Mobile: use alert
+      Alert.alert("Success", "Expense added!");
+    }
 
     // Reset fields
     setAmount("");
@@ -48,6 +76,8 @@ export default function AddExpense() {
     router.push("/transactions");
   };
 
+
+  // Cancel adding expense
   const cancel = () => {
 
     // Reset fields
@@ -58,11 +88,13 @@ export default function AddExpense() {
     router.push("/transactions");
   };
 
+  
   return (
     <Screen>
       <Card>
         <Text style={globalStyles.title}>Add new Expense</Text>
 
+        // Amount
         <Text style={styles.label}>Amount</Text>
         <TextInput
           style={styles.input}
@@ -72,20 +104,22 @@ export default function AddExpense() {
           placeholder="Enter amount"
           placeholderTextColor={colors.muted}
         />
-
+        
+        // Category
         <Text style={styles.label}>Category</Text>
         <Picker
           selectedValue={category}
           onValueChange={setCategory}
-          style={[styles.input, { backgroundColor: colors.card}]}
+          style={[styles.input, { backgroundColor: colors.card }]}
         >
-          <Picker.Item label="Select a category" value=""/>
+          <Picker.Item label="Select a category" value="" />
           {categories.map((cat: any) => (
             <Picker.Item key={cat.id} label={`${cat.icon} ${cat.name}`} value={cat.name} />
           ))}
         </Picker>
 
-        <Text style={styles.label}>Note (optional)</Text>
+        // Description
+        <Text style={styles.label}>Description (optional)</Text>
         <TextInput
           style={styles.input}
           value={note}
@@ -93,9 +127,12 @@ export default function AddExpense() {
           placeholder="Add a note"
           placeholderTextColor={colors.muted}
         />
-
+        
+        // Save button
         <PrimaryButton title="Save Expense" onPress={onSave} style={{ marginTop: spacing.md }} />
-        <PrimaryButton title="Come back to Transactions" onPress={cancel} style={{ marginTop: spacing.md, backgroundColor: colors.card }} />
+
+        // Go to Transactions button
+        <PrimaryButton title="Go Back to Transactions" onPress={cancel} style={{ marginTop: spacing.md, backgroundColor: colors.card }} />
       </Card>
     </Screen>
   );

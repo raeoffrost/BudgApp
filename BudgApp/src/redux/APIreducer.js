@@ -32,5 +32,8 @@ const apiSlice = createSlice({
   },
 });
 
+export const selectCurrency = (state) => state.api.currency;
+export const selectRate = (state) => state.api.rate;
+
 export const { setCurrency, setRate, setConversion, setQuote } = apiSlice.actions;
 export default apiSlice.reducer;

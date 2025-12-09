@@ -15,7 +15,7 @@ const expenseSlice = createSlice({
   name: "expenses",
   initialState,
   reducers: {
-    // ---- Add a new expense ----
+    // Add a new expense
     addExpense: (state, action) => {
       state.push(action.payload);
     },
