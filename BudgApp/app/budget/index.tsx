@@ -29,7 +29,7 @@ export default function BudgetOverview() {
         >
           <Button
             title={item.title}
-            onPress={() => router.push(item.route)}
+            onPress={() => router.push(item.route as any)}
             color={index % 2 === 0 ? "#58a6ff" : "#f78166"} // dynamic color
           />
         </View>

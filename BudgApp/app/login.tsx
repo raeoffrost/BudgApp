@@ -3,11 +3,11 @@ import { Redirect } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import PrimaryButton from "../../src/components/PrimaryButton";
-import Screen from "../../src/components/Screen";
-import { loginSuccess, selectIsAuthenticated } from "../../src/redux/userReducer";
-import { globalStyles } from "../../src/styles/globalStyles";
-import { colors, fontSizes, radius, spacing } from "../../src/theme/theme";
+import PrimaryButton from "../src/components/PrimaryButton";
+import Screen from "../src/components/Screen";
+import { loginSuccess, selectIsAuthenticated } from "../src/redux/userReducer";
+import { globalStyles } from "../src/styles/globalStyles";
+import { colors, fontSizes, radius, spacing } from "../src/theme/theme";
 
 const PASSWORD_KEY = "@budgapp_password";
 
@@ -91,6 +91,7 @@ export default function Login() {
     </Screen>
   );
 }
+
 
 const styles = StyleSheet.create({
   card: {

@@ -2,15 +2,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState, useEffect } from "react";
 import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
 import { useDispatch } from "react-redux";
-import Card from "../../src/components/Card";
-import PrimaryButton from "../../src/components/PrimaryButton";
-import Screen from "../../src/components/Screen";
-import { deleteExpense, updateExpense } from "../../src/redux/expenseReducer";
-import { globalStyles } from "../../src/styles/globalStyles";
-import { colors, fontSizes, spacing } from "../../src/theme/theme";
+import Card from "../../../src/components/Card";
+import PrimaryButton from "../../../src/components/PrimaryButton";
+import Screen from "../../../src/components/Screen";
+import { deleteExpense, updateExpense } from "../../../src/redux/expenseReducer";
+import { globalStyles } from "../../../src/styles/globalStyles";
+import { colors, fontSizes, spacing } from "../../../src/theme/theme";
 import { Picker } from "@react-native-picker/picker";
 import { useSelector } from "react-redux";
-import { selectCategories } from "../../src/redux/categoryReducer";
+import { selectCategories } from "../../../src/redux/categoryReducer";
 
 export default function EditTransaction() {
 
@@ -80,7 +80,7 @@ export default function EditTransaction() {
       })
     );
 
-    router.push("/transactions");
+    router.push("/(tabs)/transactions");
   };
 
 
@@ -90,7 +90,7 @@ export default function EditTransaction() {
       // Web: use browser confirm dialog
       if (window.confirm("Are you sure you want to delete this transaction?")) {
         dispatch(deleteExpense(transactionId));
-        router.replace("/transactions");
+        router.replace("/(tabs)/transactions");
       }
     } else {
       // Mobile: use alert
@@ -104,7 +104,7 @@ export default function EditTransaction() {
             style: "destructive",
             onPress: () => {
               dispatch(deleteExpense(transactionId));
-              router.replace("/transactions");
+              router.replace("/(tabs)/transactions");
             },
           },
         ]
@@ -129,7 +129,7 @@ export default function EditTransaction() {
 
         <Text style={globalStyles.title}>Edit Transaction</Text>
         
-        // Amount
+        {/* Amount */}
         <Text style={styles.label}>Amount</Text>
         <TextInput
           style={styles.input}
@@ -138,7 +138,7 @@ export default function EditTransaction() {
           onChangeText={setAmount}
         />
         
-        // Category
+        {/* Category */}
         <Text style={styles.label}>Category</Text>
         <Picker
           selectedValue={category}
@@ -151,7 +151,7 @@ export default function EditTransaction() {
           ))}
         </Picker>
         
-        // Description
+        {/* Description */}
         <Text style={styles.label}>Description</Text>
         <TextInput
           style={styles.input}
@@ -159,14 +159,14 @@ export default function EditTransaction() {
           onChangeText={setDescription}
         />
 
-        // Save Changes button
+        {/* Save Changes button */}
         <PrimaryButton title="Save Changes" onPress={saveChanges} />
 
-        // Gelete button
+        {/* Delete button */}
         <PrimaryButton title="Delete Transaction" onPress={handleDelete} style={{ backgroundColor: colors.danger, marginTop: spacing.md }} />
 
-        // Ga Back To transactions button
-        <PrimaryButton title="Go Back to Transactions" onPress={() => router.push("/transactions")} style={{ marginTop: spacing.md, backgroundColor: colors.card }} />
+        {/* Go Back To transactions button */}
+        <PrimaryButton title="Go Back to Transactions" onPress={() => router.push("/(tabs)/transactions")} style={{ marginTop: spacing.md, backgroundColor: colors.card }} />
       </Card>
 
     </Screen>

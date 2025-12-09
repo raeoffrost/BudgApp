@@ -116,103 +116,118 @@ export default function Budget() {
     closeDropdown();
   };
 
-  return (
-    <Screen scroll>
-      <Card>
-        <Text style={globalStyles.title}>Budget</Text>
+  const renderExpense = ({ item }: { item: any }) => (
+    <View style={styles.itemRow}>
+      <View style={styles.itemText}>
+        <Text style={styles.amount}>
+          ${Number(item.amount).toFixed(2)}
+        </Text>
+        <Text style={styles.category}>{item.category}</Text>
+        <Text style={styles.note}>{item.note || "No note"}</Text>
+      </View>
+    </View>
+  );
 
-        <Text style={styles.label}>Set Monthly Budget (USD):</Text>
-        <TextInput
+  const listHeader = (
+    <Card>
+      <Text style={globalStyles.title}>Budget</Text>
+
+      <Text style={styles.label}>Set Monthly Budget (USD):</Text>
+      <TextInput
+        style={[
+          styles.input,
+          errorMessage ? { borderColor: colors.danger } : {},
+        ]}
+        keyboardType="numeric"
+        value={inputValue}
+        onChangeText={setInputValue}
+        placeholder="Enter amount"
+        placeholderTextColor={colors.muted}
+      />
+
+      <PrimaryButton
+        title="Save Budget"
+        onPress={handleSaveBudget}
+        style={{ marginTop: spacing.md }}
+      />
+
+      {errorMessage ? (
+        <Text style={styles.errorText}>{errorMessage}</Text>
+      ) : null}
+
+      <Text style={[styles.label, { marginTop: spacing.lg }]}>
+        Choose currency:
+      </Text>
+      <Pressable onPress={openDropdown} style={styles.dropdownTrigger}>
+        <Text style={styles.dropdownText}>{currency}</Text>
+        <Text style={styles.dropdownChevron}>▾</Text>
+      </Pressable>
+
+      <View style={{ marginTop: spacing.lg }}>
+        <Text style={styles.summary}>
+          Budget (USD): ${numericBudget.toFixed(2)}
+        </Text>
+        <Text style={styles.summary}>
+          Budget ({currency}): {budgetInCCY.toFixed(2)} {currency}
+        </Text>
+
+        <Text style={styles.summary}>
+          Spent (USD): ${totalSpent.toFixed(2)}
+        </Text>
+        <Text style={styles.summary}>
+          Spent ({currency}): {spentInCCY.toFixed(2)} {currency}
+        </Text>
+
+        <Text
           style={[
-            styles.input,
-            errorMessage ? { borderColor: colors.danger } : {},
+            styles.summary,
+            remaining < 0 ? styles.overBudget : styles.remaining,
           ]}
-          keyboardType="numeric"
-          value={inputValue}
-          onChangeText={setInputValue}
-          placeholder="Enter amount"
-          placeholderTextColor={colors.muted}
-        />
+        >
+          Remaining (USD): ${remaining.toFixed(2)}
+        </Text>
 
-        <PrimaryButton
-          title="Save Budget"
-          onPress={handleSaveBudget}
-          style={{ marginTop: spacing.md }}
-        />
+        <Text
+          style={[
+            styles.summary,
+            remaining < 0 ? styles.overBudget : styles.remaining,
+          ]}
+        >
+          Remaining ({currency}): {remainingInCCY.toFixed(2)} {currency}
+        </Text>
 
-        {errorMessage ? (
-          <Text style={styles.errorText}>{errorMessage}</Text>
-        ) : null}
+        <ProgressBar progress={spentPct} />
+      </View>
+    </Card>
+  );
 
-        <Text style={[styles.label, { marginTop: spacing.lg }]}>Choose currency:</Text>
-        <Pressable onPress={openDropdown} style={styles.dropdownTrigger}>
-          <Text style={styles.dropdownText}>{currency}</Text>
-          <Text style={styles.dropdownChevron}>▾</Text>
-        </Pressable>
+  const listFooter = (
+    <Card style={{ marginTop: spacing.lg }}>
+      <Text style={globalStyles.title}>Transactions</Text>
+      {expenses.length === 0 && (
+        <Text style={styles.empty}>No expenses yet. Add one!</Text>
+      )}
+      <PrimaryButton
+        title="Add New Expense"
+        onPress={() =>
+          router.push("/(tabs)/transactions/add-expense")
+        }
+        style={{ marginTop: spacing.lg }}
+      />
+    </Card>
+  );
 
-        <View style={{ marginTop: spacing.lg }}>
-          <Text style={styles.summary}>
-            Budget (USD): ${numericBudget.toFixed(2)}
-          </Text>
-          <Text style={styles.summary}>
-            Budget ({currency}): {budgetInCCY.toFixed(2)} {currency}
-          </Text>
-
-          <Text style={styles.summary}>
-            Spent (USD): ${totalSpent.toFixed(2)}
-          </Text>
-          <Text style={styles.summary}>
-            Spent ({currency}): {spentInCCY.toFixed(2)} {currency}
-          </Text>
-
-          <Text
-            style={[
-              styles.summary,
-              remaining < 0 ? styles.overBudget : styles.remaining,
-            ]}
-          >
-            Remaining (USD): ${remaining.toFixed(2)}
-          </Text>
-
-
-          <Text
-            style={[
-              styles.summary,
-              remaining < 0 ? styles.overBudget : styles.remaining,
-            ]}
-          >
-            Remaining ({currency}): {remainingInCCY.toFixed(2)} {currency}
-          </Text>
-          {/* Progress bar showing % spent */}
-          <ProgressBar progress={spentPct} />
-        </View>
-      </Card>
-
-      <Card style={{ marginTop: spacing.lg }}>
-        <Text style={globalStyles.title}>Transactions</Text>
-        {expenses.length === 0 ? (
-          <Text style={styles.empty}>No expenses yet. Add one!</Text>
-        ) : (
-          <FlatList
-            data={expenses}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.itemRow}>
-                <View style={styles.itemText}>
-                  <Text style={styles.amount}>${Number(item.amount).toFixed(2)}</Text>
-                  <Text style={styles.category}>{item.category}</Text>
-                  <Text style={styles.note}>{item.note || "No note"}</Text>
-                </View>
-              </View>
-            )}
-          />
-        )}
-        <PrimaryButton
-          title="Add New Expense"
-          onPress={() => router.push("/add-expense")}
-          style={{ marginTop: spacing.lg }}
-        />
-      </Card>
+  return (
+    <Screen>
+      <FlatList
+        data={expenses}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderExpense}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={null}
+        ListFooterComponent={listFooter}
+        contentContainerStyle={{ paddingBottom: spacing.lg }}
+      />
 
       <OverBudgetModal
         visible={showOverBudget}
@@ -228,11 +243,17 @@ export default function Budget() {
         animationType="fade"
         onRequestClose={() => setErrorMessage("")}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setErrorMessage("")}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setErrorMessage("")}
+        >
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Budget error</Text>
             <Text style={styles.modalMessage}>{errorMessage}</Text>
-            <PrimaryButton title="OK" onPress={() => setErrorMessage("")} />
+            <PrimaryButton
+              title="OK"
+              onPress={() => setErrorMessage("")}
+            />
           </View>
         </Pressable>
       </Modal>
@@ -244,7 +265,10 @@ export default function Budget() {
         animationType="fade"
         onRequestClose={closeDropdown}
       >
-        <Pressable style={styles.modalOverlay} onPress={closeDropdown}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={closeDropdown}
+        >
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Select currency</Text>
             <FlatList

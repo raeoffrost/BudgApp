@@ -1,4 +1,3 @@
-// app/goals.tsx
 import React, { useState, useMemo } from "react";
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
@@ -13,7 +12,9 @@ import { colors, spacing, fontSizes, radius } from "../../src/theme/theme";
 
 export default function GoalScreen() {
   const goals = useSelector((state: any) => state.goals.goals);
-  const transactions = useSelector((state: any) => state.goals.goalTransactions);
+  const transactions = useSelector(
+    (state: any) => state.goals.goalTransactions
+  );
   const dispatch = useDispatch();
 
   const [goalModalVisible, setGoalModalVisible] = useState(false);
@@ -33,7 +34,8 @@ export default function GoalScreen() {
   const renderGoal = ({ item }: { item: any }) => {
     const progress = Number(item.progress) || 0;
     const target = Number(item.target) || 0;
-    const progressPct = target > 0 ? Math.min((progress / target) * 100, 100) : 0;
+    const progressPct =
+      target > 0 ? Math.min((progress / target) * 100, 100) : 0;
 
     const goalTxs = txByGoal[item.id] || [];
 
@@ -75,28 +77,35 @@ export default function GoalScreen() {
     );
   };
 
-  return (
-    <Screen scroll>
-      <Card style={{ marginBottom: spacing.md }}>
-        <Text style={styles.header}>Goals</Text>
-        <PrimaryButton
-          title="Add goal"
-          onPress={() => setGoalModalVisible(true)}
-          style={{ marginTop: spacing.sm }}
-        />
-      </Card>
+  const listHeader = (
+    <Card style={{ marginBottom: spacing.md }}>
+      <Text style={styles.header}>Goals</Text>
+      <PrimaryButton
+        title="Add goal"
+        onPress={() => setGoalModalVisible(true)}
+        style={{ marginTop: spacing.sm }}
+      />
+    </Card>
+  );
 
+  return (
+    <Screen>
       <FlatList
         data={goals}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderGoal}
-        ListEmptyComponent={<Text style={styles.empty}>No goals yet. Add one!</Text>}
-        // Force re-render when transactions change
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={
+          <Text style={styles.empty}>No goals yet. Add one!</Text>
+        }
         extraData={transactions}
         contentContainerStyle={{ paddingBottom: spacing.lg }}
       />
 
-      <AddGoalModal visible={goalModalVisible} onClose={() => setGoalModalVisible(false)} />
+      <AddGoalModal
+        visible={goalModalVisible}
+        onClose={() => setGoalModalVisible(false)}
+      />
 
       <AddGoalTransactionModal
         visible={txModalGoalId !== null}

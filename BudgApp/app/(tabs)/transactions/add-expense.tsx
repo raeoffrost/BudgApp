@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { Alert, StyleSheet, Text, TextInput } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
-import Card from "../../src/components/Card";
-import PrimaryButton from "../../src/components/PrimaryButton";
-import Screen from "../../src/components/Screen";
-import { addExpense } from "../../src/redux/expenseReducer";
-import { colors, fontSizes, spacing } from "../../src/theme/theme";
+import Card from "../../../src/components/Card";
+import PrimaryButton from "../../../src/components/PrimaryButton";
+import Screen from "../../../src/components/Screen";
+import { addExpense } from "../../../src/redux/expenseReducer";
+import { colors, fontSizes, spacing } from "../../../src/theme/theme";
 import { useRouter } from "expo-router";
-import { selectCategories } from "../../src/redux/categoryReducer";
+import { selectCategories } from "../../../src/redux/categoryReducer";
 import { Picker } from '@react-native-picker/picker';
-import { globalStyles } from "../../src/styles/globalStyles";
+import { globalStyles } from "../../../src/styles/globalStyles";
 
 export default function AddExpense() {
 
@@ -59,7 +59,7 @@ export default function AddExpense() {
       })
     );
 
-    // Alert - Success cnfirmation
+    // Alert - Success confirmation
     if (typeof window !== "undefined") {
       // Web: use browser confirm dialog
       window.alert("Success \n\n Expense added!");
@@ -94,7 +94,7 @@ export default function AddExpense() {
       <Card>
         <Text style={globalStyles.title}>Add new Expense</Text>
 
-        // Amount
+        {/* Amount */}
         <Text style={styles.label}>Amount</Text>
         <TextInput
           style={styles.input}
@@ -105,7 +105,7 @@ export default function AddExpense() {
           placeholderTextColor={colors.muted}
         />
         
-        // Category
+        {/* Category */}
         <Text style={styles.label}>Category</Text>
         <Picker
           selectedValue={category}
@@ -118,7 +118,7 @@ export default function AddExpense() {
           ))}
         </Picker>
 
-        // Description
+        {/* Description */}
         <Text style={styles.label}>Description (optional)</Text>
         <TextInput
           style={styles.input}
@@ -128,10 +128,10 @@ export default function AddExpense() {
           placeholderTextColor={colors.muted}
         />
         
-        // Save button
+        {/* Save button */}
         <PrimaryButton title="Save Expense" onPress={onSave} style={{ marginTop: spacing.md }} />
 
-        // Go to Transactions button
+        {/* Go to Transactions button */}
         <PrimaryButton title="Go Back to Transactions" onPress={cancel} style={{ marginTop: spacing.md, backgroundColor: colors.card }} />
       </Card>
     </Screen>
