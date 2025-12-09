@@ -47,7 +47,9 @@ export default function Budget() {
     0
   );
   const numericBudget = Number(budget) || 0;
-  const spentPct = numericBudget > 0 ? Math.min((totalSpent / numericBudget)* 100, 100): 0;
+  const spentPct = numericBudget > 0
+  ? (totalSpent / numericBudget) * 100
+  : 0;
   const remaining = numericBudget - totalSpent;
 
   // Converted values (derived from rate)
