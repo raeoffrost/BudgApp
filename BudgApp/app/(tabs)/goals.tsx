@@ -1,7 +1,17 @@
 import React, { useState, useMemo } from "react";
-import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Pressable,
+  Modal,
+} from "react-native";
 import { useSelector, useDispatch } from "react-redux";
-import { removeGoal } from "../../src/redux/goalReducer";
+import {
+  removeGoal,
+  markGoalCongratsShown,
+} from "../../src/redux/goalReducer";
 import AddGoalModal from "../../src/components/AddGoalModal";
 import AddGoalTransactionModal from "../../src/components/AddGoalTransactionModal";
 import ProgressBar from "../../src/components/ProgressBar";
@@ -9,6 +19,7 @@ import Card from "../../src/components/Card";
 import PrimaryButton from "../../src/components/PrimaryButton";
 import Screen from "../../src/components/Screen";
 import { colors, spacing, fontSizes, radius } from "../../src/theme/theme";
+import ConfettiCannon from "react-native-confetti-cannon";
 
 export default function GoalScreen() {
   const goals = useSelector((state: any) => state.goals.goals);
@@ -19,8 +30,9 @@ export default function GoalScreen() {
 
   const [goalModalVisible, setGoalModalVisible] = useState(false);
   const [txModalGoalId, setTxModalGoalId] = useState<number | null>(null);
+  const [congratsGoal, setCongratsGoal] = useState<any | null>(null);
 
-  // Stable memo to avoid unnecessary re-renders but ensure updates on changes
+  // Group transactions by goal
   const txByGoal = useMemo(() => {
     const map: Record<number, any[]> = {};
     for (const tx of transactions) {
@@ -38,6 +50,11 @@ export default function GoalScreen() {
       target > 0 ? Math.min((progress / target) * 100, 100) : 0;
 
     const goalTxs = txByGoal[item.id] || [];
+
+    // Trigger congratulations modal once per goal
+    if (item.completed && !item.congratsShown && !congratsGoal) {
+      setCongratsGoal(item);
+    }
 
     return (
       <Card style={styles.goalCard}>
@@ -112,6 +129,42 @@ export default function GoalScreen() {
         onClose={() => setTxModalGoalId(null)}
         goalId={txModalGoalId as number}
       />
+
+      {/* Congratulations Modal */}
+      {congratsGoal && (
+        <Modal
+          transparent
+          visible={!!congratsGoal}
+          animationType="fade"
+          onRequestClose={() => {
+            dispatch(markGoalCongratsShown(congratsGoal.id));
+            setCongratsGoal(null);
+          }}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>🎉 Congratulations!</Text>
+              <Text style={styles.modalMessage}>
+                You have met your goal: {congratsGoal.title}
+              </Text>
+              <PrimaryButton
+                title="OK"
+                onPress={() => {
+                dispatch(markGoalCongratsShown(congratsGoal.id));
+                setCongratsGoal(null);
+                }}
+                style={styles.modalButton}
+                />
+              {/* Confetti animation */}
+              <ConfettiCannon
+                count={150}
+                origin={{ x: 200, y: 0 }}
+                fadeOut={true}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
     </Screen>
   );
 }
@@ -136,8 +189,16 @@ const styles = StyleSheet.create({
     color: colors.muted,
     marginTop: spacing.xs,
   },
-  remove: { color: colors.danger, fontSize: fontSizes.sm, marginTop: spacing.sm },
-  empty: { color: colors.muted, textAlign: "center", marginTop: spacing.lg },
+  remove: {
+    color: colors.danger,
+    fontSize: fontSizes.sm,
+    marginTop: spacing.sm,
+  },
+  empty: {
+    color: colors.muted,
+    textAlign: "center",
+    marginTop: spacing.lg,
+  },
   txHeader: {
     fontSize: fontSizes.sm,
     fontWeight: "600",
@@ -151,4 +212,43 @@ const styles = StyleSheet.create({
   },
   txItem: { fontSize: fontSizes.xs, color: colors.text },
   txDate: { fontSize: fontSizes.xs, color: colors.muted },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)", // softer overlay
+    justifyContent: "center",
+    alignItems: "center",
+    padding: spacing.md,
+  },
+  modalCard: {
+    backgroundColor: colors.background,
+    padding: spacing.lg,
+    borderRadius: radius.lg,
+    width: "90%",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: fontSizes.lg,
+    fontWeight: "700",
+    color: colors.primary,
+    marginBottom: spacing.sm,
+    textAlign: "center",
+  },
+  modalMessage: {
+    fontSize: fontSizes.md,
+    color: colors.text,
+    marginBottom: spacing.md,
+    textAlign: "center",
+  },
+  modalButton: {
+  marginTop: spacing.md,
+  alignSelf: "stretch",       // makes it fill the card width
+  paddingVertical: spacing.md // increases height
+},
 });
